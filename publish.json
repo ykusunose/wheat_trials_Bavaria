@@ -1,7 +1,7 @@
 {
     "title": "Winter wheat variety trial locations in Bavaria, Germany",
-    "info": "These data are from a research project in which my collaborator (at the University of Bonn) and I ask, 'are current yield trials providing breeders sufficient information to adapt wheat varieties for future climate change scenarios?"
-    "coordinates": [38, -84.5],
+    "info": "These data are from a research project in which my collaborator (at the University of Bonn) and I ask, 'are current yield trials providing breeders sufficient information to adapt wheat varieties for future climate change scenarios?",
+    "coordinates": [48.7775, 11.43111],
     "author": "Yoko, using Maria's data.",
     "link": "https://ykusunose.github.io/wheat_trials_Bavaria/"
 

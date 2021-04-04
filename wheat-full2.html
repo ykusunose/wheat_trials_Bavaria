@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset=utf-8 />
+  <title>Winter Wheat Trials II</title>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+  <!-- Is the is the latest version of Leaflet? -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: rgb(233, 219, 202);
+      font-family: "Lato", sans-serif;
+      font-size: 70%;
+      font-weight: 300;
+      color: rgb(48, 89, 177);
+    }
+
+    header,
+    footer,
+    section {
+      padding: 6px 10%;
+      margin: 0 auto;
+      width: 80%
+    }
+
+    h1 {
+      display: inline-block;
+      margin-right: 20px;
+      color: rgb(86, 116, 212);
+      font-size: 3.5em;
+      font-weight: 700;
+    }
+
+    h2 {
+      display: inline-block;
+      color: rgba(177, 101, 39, 0.8);
+      letter-spacing: 0.05em;
+      margin-top: 0px;
+      font-weight: 300;
+      text-transform: uppercase;
+      border-bottom: 1px dotted rgba(255, 200, 0, 0.5);
+      ;
+    }
+    h3 {
+      display: inline-block;
+      color: rgba(2, 2, 1, 0.8);
+      letter-spacing: 0.05em;
+      margin-top: 0px;
+      font-size: 1.0em;
+      font-weight: 300;
+      text-transform: uppercase;
+
+     
+     }
+    #map {
+      width: 80%;
+      height: 540px;
+      margin: 10px auto;
+    }
+
+    p {
+      font-size: 1em;
+      color: rgb(82, 41, 41);
+      ;
+      font-weight: 400;
+      font-size: 1.2em;
+    }
+    a:link {
+      color: black;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Winter wheat variety trial locations in Bavaria, Germany</h1>
+    <h2>Varieties by location/year</h2>
+  </header>
+
+  <div id='map'></div>
+  <footer>
+    <p id = "deets" > Site details go here:</p>
+
+    <p>This map shows the yield trial sites for winter wheat in Bavaria, Germany. The radii of the circles correspond to the number of varieties tested at each site. </p>
+    <ul>
+      <li>Map authored by <a href="https://agecon.ca.uky.edu/person/yoko-kusunose">Munchasaurus Rex</a> 
+      <li>See my projects on GitHub: <a href="https://github.com/ykusunose">ykusunose</a></li> 
+    </ul>
+  </footer>
+  <!-- Is the is the latest version of Leaflet? -->
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+		integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+		crossorigin=""></script>
+	<!-- Load a Leaflet plugin to provide geolocation if user shares their location with browser. -->
+	<script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.js"
+		charset="utf-8"></script>
+  <script src="data/trialLocs3yrs.js"></script>
+
+  <script>
+    var map = L.map('map', {
+      center: [48.7775, 11.43111],
+      zoom: 7,
+    });
+
+    var tiles = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+      subdomains: 'abcd',
+      maxZoom: 19
+    }).addTo(map);
+
+    // Object containing info for all 3 layers
+    var circleMult = 300
+
+    var layerInfo = {
+      yr2000:     {yr: 2000, circleBase: "vars2000"},
+      yr2010:     {yr: 2010, circleBase: "vars2010"},
+      yr2019:     {yr: 2019, circleBase: "vars2019"}
+
+    };
+    // Build empty JS object
+    var geoJsonLayers = {};   
+
+    // Loop thru (obj) layerInfo to populate (obj) geoJsonLayers
+    for (var layer in layerInfo) {
+      var trials = layerInfo[layer].circleBase;
+      var yr = layerInfo[layer].yr;
+      //console.log(`In ${yr}, there were ${trials} trials.`);
+      geoJsonLayers[layer] = L.geoJson (locData, {
+        //This portion makes it into a layer
+        pointToLayer: function (feature, latlng) {
+            var props = feature.properties[`${trials}`];
+            //console.log(props);
+            var ttContent = `${feature.properties.location}`;
+           // ttContent+=`<br>${yr}: ${feature.properties[`${trials}`]}`
+          return L.circle(latlng, circleMult * props ) .bindPopup(ttContent);
+        },
+        onEachFeature: function(feature,layer){
+            layer.on({
+                click: (function (event) {
+                    var deets = document.getElementById("allYearData").innerHTML = "Test!";
+                }).bind(deets)
+            })
+        }
+
+        /*
+        ,
+        filter: function (feature) {
+          return feature;
+        }
+        
+        ,
+        style: function (feature) {
+          return {
+            color: layerInfo[layer].color,
+            fillColor: layerInfo[layer].color,
+            stroke: null,
+            radius: 5,
+            fillOpacity: 1
+          }
+        }
+        */
+      }).addTo(map)
+    }
+    //console.log(geoJsonLayers);
+    // Layers object
+    var yearLayers = {
+      "<b>2000</b>": geoJsonLayers.yr2000,
+      "<b>2010</b>": geoJsonLayers.yr2010,
+      "<b>2019</b>": geoJsonLayers.yr2019
+    }
+    
+
+    // Layer control panel
+    L.control.layers(null, yearLayers, {
+      collapsed:false
+    }).addTo(map);
+
+    
+
+    
+
+    /*
+    // Interactivity
+    map.on('click', function (e) {
+            // center circle location on current click point
+        radiusCircle.setLatLng(e.latlng)
+        .addTo(map);
+        // Loop through object containing geojson layers
+        for (var gsLayer in layerInfo) {
+            // Add a function to each layer geoJsonLayers object
+            geoJsonLayers[gsLayer].eachLayer(function (layer) {
+                //console.log(`layerInfo[gsLayer]: ${layerInfo[gsLayer].source} \n*******\n`)
+                //console.log(`geoJsonLayers[gsLayer]: ${geoJsonLayers[gsLayer]} \n*******\n`)
+                //console.log(`gsLayer: ${gsLayer} \n*******\n`)
+                //console.log(`layer: ${layer} \n*******\n`)
+                var props = layer.feature.properties;
+                if (gsLayer == "stationLayer") {
+                  var stationString = props.STATION_NU.split('-');
+                  var content = `<h3> Fire Station No. <b>${stationString[1]}</b></h3>`;
+                  layer.bindTooltip(content);
+                }
+                if (gsLayer == "storeLayer") {
+                  var content = `<h3> Food store:  <br> <b>${props.STORE_NAME}</b></h3>` ;
+                  layer.bindTooltip(content);
+                }
+                if (gsLayer == "programLayer") {
+                  var content = `<h3> After-School Program: <br> <b>${props.ORGANIZATI}</b></h3>` ;
+                  layer.bindTooltip(content);
+                }
+                var distance = e.latlng.distanceTo(layer.getLatLng()) / 1000;
+                if (distance > 1) {
+                    layer.setStyle({
+                        fillOpacity: 0.1
+                    });
+                } else {
+                    layer.setStyle({
+                        fillOpacity: 1
+                });
+              }
+            });
+
+        }
+            });
+    var radiusCircle = L.circle([0, 0], 1000, {
+      fillColor: 'white',
+      fillOpacity: .1,
+      color: 'yellow',
+      opacity: .3,
+      stroke: false,
+      weight: 3,
+      interactive: false // This allows users to click through the circle
+    })
+    */
+  </script>
+
+</body>
+</html>

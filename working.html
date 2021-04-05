@@ -84,7 +84,7 @@
 
   <div id='map'></div>
   <footer>
-    <p id = "deets" > Site details go here: I WANT TO BE ABLE TO PUT THE CLICKED SITE'S DATA HERE.</p>
+    <p id = "allYearData" > Site details go here: I WANT TO BE ABLE TO PUT THE CLICKED SITE'S DATA HERE.</p>
 
     <p>Crop breeders continually develop and test new crop varieties by planting them in diverse environments over multiple years. These tests are called 'yield trials' or 'variety trials.' </p>
 
@@ -114,9 +114,21 @@
       subdomains: 'abcd',
       maxZoom: 19
     }).addTo(map);
+    
+    gveOptions = {
+      tms: true, 
+      opacity: 0.7, 
+      attribution: "", 
+      minZoom: 1, 
+      maxZoom: 9
+    }
+    
+    var gveDensity = L.tileLayer('tiles/{z}/{x}/{y}.png', gveOptions).addTo(map);
 
     // Object containing info for all 3 layers
     var circleMult = 300
+
+    var deets = document.getElementById("allYearData")
 
     var layerInfo = {
       yr2000:     {yr: 2000, circleBase: "vars2000"},
@@ -141,11 +153,24 @@
            // ttContent+=`<br>${yr}: ${feature.properties[`${trials}`]}`
           return L.circle(latlng, circleMult * props ) .bindPopup(ttContent);
         },
-        onEachFeature: function(feature,layer){
-            layer.on({
-                click: (function (event) {
-                    var deets = document.getElementById("allYearData").innerHTML = "Test!";
-                }).bind(deets)
+        onEachFeature: function(feature, lyr){
+          var props = feature.properties[`${trials}`];
+            //console.log(props);
+            var ttContent = `${feature.properties.location}`;
+          for (x of locData.features) {
+            // console.log(x.properties.location, ttContent)
+            if (ttContent == x.properties.location) {
+              // console.log(x.properties.location)
+              for (var y in layerInfo){
+                console.log(layerInfo[y])
+                // x.properties[]
+              }
+          }
+          }
+          var popup
+            lyr.on("click", function (event) {
+              console.log(deets)
+              deets.innerHTML = "Test!";
             })
         }
 
@@ -168,6 +193,8 @@
         */
       }).addTo(map)
     }
+
+
     //console.log(geoJsonLayers);
     // Layers object
     var yearLayers = {

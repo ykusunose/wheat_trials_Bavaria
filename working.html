@@ -41,18 +41,18 @@
       color: rgba(177, 101, 39, 0.8);
       letter-spacing: 0.05em;
       margin-top: 0px;
-      font-weight: 300;
+      font-weight: 400;
       text-transform: uppercase;
       border-bottom: 1px dotted rgba(255, 200, 0, 0.5);
       ;
     }
     h3 {
       display: inline-block;
-      color: rgba(2, 2, 1, 0.8);
+      color: rgba(177, 101, 39, 0.8);
       letter-spacing: 0.05em;
       margin-top: 0px;
       font-size: 1.0em;
-      font-weight: 300;
+      font-weight: 400;
       text-transform: uppercase;
 
      
@@ -63,12 +63,12 @@
       margin: 10px auto;
     }
 
-    p {
+    p, li {
       font-size: 1em;
-      color: rgb(82, 41, 41);
+      color: rgba(177, 101, 39, 0.8);
       ;
-      font-weight: 400;
-      font-size: 1.2em;
+      font-weight: 300;
+      font-size: 1.5em;
     }
     a:link {
       color: black;
@@ -84,14 +84,16 @@
 
   <div id='map'></div>
   <footer>
-    <p id = "allYearData" > Site details go here: I WANT TO BE ABLE TO PUT THE CLICKED SITE'S DATA HERE.</p>
+    <h2 id = "allYearData" > Click on any site to see the number of varieties tested each year.</h2>
 
     <p>Crop breeders continually develop and test new crop varieties by planting them in diverse environments over multiple years. These tests are called 'yield trials' or 'variety trials.' </p>
 
     <p>This map shows the yield trial sites for winter wheat in Bavaria, Germany. The radii of the circles correspond to the number of varieties tested at each site. In my research, I use the number of tested varieties as a proxy for the 'information' gathered at each location.</p>
     <ul>
-      <li>Map authored by <a href="https://agecon.ca.uky.edu/person/yoko-kusunose">Munchasaurus Rex</a> 
-      <li>See my projects on GitHub: <a href="https://github.com/ykusunose">ykusunose</a></li> 
+      <li>Map authored by Munchasaurus Rex. 
+      <li> Variety trial data were collected by Munchasaurus' collaborator at <a href = "https://www.uni-bonn.de/the-university">the University of Bonn.</a>
+       <li> The raster file depicts the intensity of agricultural production, by 'pixel.' The file came from the <a href = "https://www.atlas-agrarstatistik.nrw.de/"> German Statistics Office</a> and was converted into a Leaflet layer by tastyfreeze.   
+      <li>See my projects on <a href="https://github.com/ykusunose">GitHub</a></li> 
     </ul>
   </footer>
   <!-- Is the is the latest version of Leaflet? -->
@@ -127,7 +129,6 @@
 
     // Object containing info for all 3 layers
     var circleMult = 300
-
     var deets = document.getElementById("allYearData")
 
     var layerInfo = {
@@ -160,37 +161,18 @@
           for (x of locData.features) {
             // console.log(x.properties.location, ttContent)
             if (ttContent == x.properties.location) {
-              // console.log(x.properties.location)
-              for (var y in layerInfo){
-                console.log(layerInfo[y])
-                // x.properties[]
-              }
-          }
+              var deetsContent = `Winter wheat varieties tested in <b>${x.properties.location}</b> <br> 2000: ${x.properties.vars2000} <br> 2010: ${x.properties.vars2010} <br> 2019: ${x.properties.vars2019}`
+              //console.log(deetsContent);
+              
+            }
           }
           var popup
             lyr.on("click", function (event) {
               console.log(deets)
-              deets.innerHTML = "Test!";
+              deets.innerHTML = deetsContent;
             })
         }
-
-        /*
-        ,
-        filter: function (feature) {
-          return feature;
-        }
-        
-        ,
-        style: function (feature) {
-          return {
-            color: layerInfo[layer].color,
-            fillColor: layerInfo[layer].color,
-            stroke: null,
-            radius: 5,
-            fillOpacity: 1
-          }
-        }
-        */
+    
       }).addTo(map)
     }
 
@@ -209,62 +191,7 @@
       collapsed:false
     }).addTo(map);
 
-    
-
-    
-
-    /*
-    // Interactivity
-    map.on('click', function (e) {
-            // center circle location on current click point
-        radiusCircle.setLatLng(e.latlng)
-        .addTo(map);
-        // Loop through object containing geojson layers
-        for (var gsLayer in layerInfo) {
-            // Add a function to each layer geoJsonLayers object
-            geoJsonLayers[gsLayer].eachLayer(function (layer) {
-                //console.log(`layerInfo[gsLayer]: ${layerInfo[gsLayer].source} \n*******\n`)
-                //console.log(`geoJsonLayers[gsLayer]: ${geoJsonLayers[gsLayer]} \n*******\n`)
-                //console.log(`gsLayer: ${gsLayer} \n*******\n`)
-                //console.log(`layer: ${layer} \n*******\n`)
-                var props = layer.feature.properties;
-                if (gsLayer == "stationLayer") {
-                  var stationString = props.STATION_NU.split('-');
-                  var content = `<h3> Fire Station No. <b>${stationString[1]}</b></h3>`;
-                  layer.bindTooltip(content);
-                }
-                if (gsLayer == "storeLayer") {
-                  var content = `<h3> Food store:  <br> <b>${props.STORE_NAME}</b></h3>` ;
-                  layer.bindTooltip(content);
-                }
-                if (gsLayer == "programLayer") {
-                  var content = `<h3> After-School Program: <br> <b>${props.ORGANIZATI}</b></h3>` ;
-                  layer.bindTooltip(content);
-                }
-                var distance = e.latlng.distanceTo(layer.getLatLng()) / 1000;
-                if (distance > 1) {
-                    layer.setStyle({
-                        fillOpacity: 0.1
-                    });
-                } else {
-                    layer.setStyle({
-                        fillOpacity: 1
-                });
-              }
-            });
-
-        }
-            });
-    var radiusCircle = L.circle([0, 0], 1000, {
-      fillColor: 'white',
-      fillOpacity: .1,
-      color: 'yellow',
-      opacity: .3,
-      stroke: false,
-      weight: 3,
-      interactive: false // This allows users to click through the circle
-    })
-    */
+  
   </script>
 
 </body>

@@ -38,17 +38,15 @@
 
     h2 {
       display: inline-block;
-      color: rgba(177, 101, 39, 0.8);
+      color: rgba(155, 87, 32, 0.8);
       letter-spacing: 0.05em;
       margin-top: 0px;
       font-weight: 400;
       text-transform: uppercase;
-      border-bottom: 1px dotted rgba(255, 200, 0, 0.5);
-      ;
     }
     h3 {
       display: inline-block;
-      color: rgba(177, 101, 39, 0.8);
+      color:rgba(155, 87, 32, 0.8);
       letter-spacing: 0.05em;
       margin-top: 0px;
       font-size: 1.0em;
@@ -65,7 +63,7 @@
 
     p, li {
       font-size: 1em;
-      color: rgba(177, 101, 39, 0.8);
+      color: rgba(155, 87, 32, 0.8);
       ;
       font-weight: 300;
       font-size: 1.5em;
@@ -73,22 +71,26 @@
     a:link {
       color: black;
     }
+
+    .leaflet-control-layers-toggle {
+        width: auto;
+        padding: 3px
+    }
+
   </style>
 </head>
 
 <body>
   <header>
-    <h1>Winter wheat variety trial locations in Bavaria, Germany</h1>
-    <h2>Varieties by location/year</h2>
+    <h1>Winter wheat variety trials in Bavaria, Germany</h1>
+    <h2>Test plots/varieties by location and year (select years)</h2>
   </header>
 
   <div id='map'></div>
   <footer>
     <h2 id = "allYearData" > Click on any site to see the number of varieties tested each year.</h2>
 
-    <p>Crop breeders continually develop and test new crop varieties by planting them in diverse environments over multiple years. These tests are called 'yield trials' or 'variety trials.' </p>
-
-    <p>This map shows the yield trial sites for winter wheat in Bavaria, Germany. The radii of the circles correspond to the number of varieties tested at each site. In my research, I use the number of tested varieties as a proxy for the 'information' gathered at each location.</p>
+    <p>Crop breeders continually develop and test new crop varieties by planting them in diverse environments over multiple years. These tests are called 'yield trials' or 'variety trials.' This map shows the yield trial sites for winter wheat in Bavaria, Germany. The radii of the circles correspond to the number of test plots at each site. The number of test plots can be thought of as the amount of 'information' being collected at each site in any given year.</p>
     <ul>
       <li>Map authored by Munchasaurus Rex. 
       <li> Variety trial data were collected by Munchasaurus' collaborator at <a href = "https://www.uni-bonn.de/the-university">the University of Bonn.</a>
@@ -103,12 +105,12 @@
 	<!-- Load a Leaflet plugin to provide geolocation if user shares their location with browser. -->
 	<script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.js"
 		charset="utf-8"></script>
-  <script src="data/trialLocs3yrs.js"></script>
+  <script src="data/trialLocs20yrs.js"></script>
 
   <script>
     var map = L.map('map', {
-      center: [48.7775, 11.43111],
-      zoom: 7,
+      center: [48.9, 10.9],
+      zoom: 7.2,
     });
 
     var tiles = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
@@ -127,13 +129,15 @@
     
     var gveDensity = L.tileLayer('tiles/{z}/{x}/{y}.png', gveOptions).addTo(map);
 
-    // Object containing info for all 3 layers
-    var circleMult = 300
+    // Object containing info for all 5 layers
+    var circleMult = 400
     var deets = document.getElementById("allYearData")
 
     var layerInfo = {
       yr2000:     {yr: 2000, circleBase: "vars2000"},
+      yr2005:     {yr: 2005, circleBase: "vars2005"},
       yr2010:     {yr: 2010, circleBase: "vars2010"},
+      yr2015:     {yr: 2015, circleBase: "vars2015"},
       yr2019:     {yr: 2019, circleBase: "vars2019"}
 
     };
@@ -145,25 +149,20 @@
       var trials = layerInfo[layer].circleBase;
       var yr = layerInfo[layer].yr;
       //console.log(`In ${yr}, there were ${trials} trials.`);
-      geoJsonLayers[layer] = L.geoJson (locData, {
+      geoJsonLayers[layer] = L.geoJson (locData20, {
         //This portion makes it into a layer
         pointToLayer: function (feature, latlng) {
-            var props = feature.properties[`${trials}`];
-            //console.log(props);
-            var ttContent = `${feature.properties.location}`;
-           // ttContent+=`<br>${yr}: ${feature.properties[`${trials}`]}`
+          var props = feature.properties[`${trials}`];
+          var ttContent = `${feature.properties.location}`;
           return L.circle(latlng, circleMult * props ) .bindPopup(ttContent);
         },
         onEachFeature: function(feature, lyr){
           var props = feature.properties[`${trials}`];
-            //console.log(props);
-            var ttContent = `${feature.properties.location}`;
-          for (x of locData.features) {
-            // console.log(x.properties.location, ttContent)
+          var ttContent = `${feature.properties.location}`;
+          for (x of locData20.features) {
             if (ttContent == x.properties.location) {
-              var deetsContent = `Winter wheat varieties tested in <b>${x.properties.location}</b> <br> 2000: ${x.properties.vars2000} <br> 2010: ${x.properties.vars2010} <br> 2019: ${x.properties.vars2019}`
-              //console.log(deetsContent);
-              
+              var deetsContent = `Number of test plots in <b>${x.properties.location}</b> <br> 2000: ${x.properties.vars2000} <br> 2005: ${x.properties.vars2005} <br> 2010: ${x.properties.vars2010} <br> 2015: ${x.properties.vars2015} <br> 2019: ${x.properties.vars2019}`
+              //console.log(deetsContent);        
             }
           }
           var popup
@@ -171,27 +170,31 @@
               console.log(deets)
               deets.innerHTML = deetsContent;
             })
-        }
-    
+        }    
       }).addTo(map)
+        .setStyle({
+          color: "#347bed",
+          weight: 1,
+          fillOpacity: .1
+        })
     }
-
 
     //console.log(geoJsonLayers);
     // Layers object
     var yearLayers = {
-      "<b>2000</b>": geoJsonLayers.yr2000,
-      "<b>2010</b>": geoJsonLayers.yr2010,
-      "<b>2019</b>": geoJsonLayers.yr2019
+      "2000": geoJsonLayers.yr2000,
+      "2005": geoJsonLayers.yr2005,
+      "2010": geoJsonLayers.yr2010,
+      "2015": geoJsonLayers.yr2015,
+      "2019": geoJsonLayers.yr2019
     }
     
 
     // Layer control panel
     L.control.layers(null, yearLayers, {
       collapsed:false
-    }).addTo(map);
-
-  
+    }).addTo(map)
+     
   </script>
 
 </body>
